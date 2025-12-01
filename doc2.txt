@@ -1,0 +1,2 @@
+Deep learning is a subset of machine learning.
+Deep learning uses neural networks.
