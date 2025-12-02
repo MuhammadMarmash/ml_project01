@@ -47,6 +47,10 @@ def reduce_dimensions(
     coords: (n_docs, n_components) array for plotting.
     """
     # 1. Center the data (very important for PCA)
+    if X.size == 0:
+        # Empty input: return zero coordinates
+        return np.zeros((X.shape[0], n_components), dtype=float)
+
     X_centered = X - X.mean(axis=0, keepdims=True)
 
     # 2. Compute SVD
@@ -54,10 +58,16 @@ def reduce_dimensions(
 
     # 3. Take first n_components columns of U and scale by S
     #    This gives us principal-component coordinates.
-    U_reduced = U[:, :n_components]
-    S_reduced = S[:n_components]
+    # If the SVD returns fewer components than requested (e.g. small rank),
+    # pad with zeros so the returned coords always have shape (n_docs, n_components).
+    n_available = min(U.shape[1], len(S))
 
-    coords = U_reduced * S_reduced
+    coords = np.zeros((U.shape[0], n_components), dtype=float)
+    if n_available > 0:
+        take = min(n_components, n_available)
+        U_reduced = U[:, :take]
+        S_reduced = S[:take]
+        coords[:, :take] = U_reduced * S_reduced
 
     # For this assignment, PCA vs SVD mainly affects how you EXPLAIN it.
     # The math here is the same; you can mention that PCA is basically

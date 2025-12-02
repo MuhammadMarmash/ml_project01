@@ -86,11 +86,18 @@ class TFIDF:
         return self
 
     def transform(self, documents: List[str]) -> np.ndarray:
-        if self.idf_ is None or not self.vocabulary_:
+        if self.idf_ is None:
             raise ValueError("TFIDF model is not fitted yet. Call fit() first.")
 
         n_docs = len(documents)
         n_vocab = len(self.vocabulary_)
+
+        # If vocabulary is empty (e.g. all documents had no valid tokens
+        # after preprocessing), return an empty feature matrix rather than
+        # raising. This allows pipelines to continue and handle empty rows.
+        if n_vocab == 0:
+            return np.zeros((n_docs, 0), dtype=np.float64)
+
         X = np.zeros((n_docs, n_vocab), dtype=np.float64)
 
         for i, doc in enumerate(documents):

@@ -1,2 +1,0 @@
-Machine learning is a subset of artificial intelligence.
-Machine learning algorithms learn from data.

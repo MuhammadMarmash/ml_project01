@@ -1,65 +1,55 @@
-# TF-IDF Document Analysis (Project 01)
+# Interim Assignment 01 - TF-IDF Document Analysis
 
-Small teaching project that implements a lightweight TF-IDF engine, keyword
-filtering and simple dimensionality-reduction visualizations using NumPy and
-Plotly. The project is wired to a minimal Streamlit UI for interactive use.
+## Team Members
+
+- Mohammad Marmash (ID: 326791068)
+- NMhammad Siag (ID: 213988819)
+- Abdullah Abulafi (ID: 213976194)
+
+## Project Overview
+
+Lightweight TF-IDF engine with keyword filtering and simple dimensionality
+reduction visualizations. The project includes a minimal Streamlit UI that
+accepts `.txt` files, computes TF-IDF under configurable preprocessing options,
+and displays document embeddings using NumPy + Plotly.
 
 ## What this repo contains
 
 - `app.py` — Streamlit app (main entrypoint)
-- `tfidf.py` — simple TF-IDF engine (fit/transform, preprocessing options)
+- `tfidf.py` — TF-IDF engine (fit/transform, preprocessing options)
 - `keyword_vectors.py` — build a reduced keyword matrix from TF-IDF
 - `dr.py`, `plots.py` — dimensionality reduction + Plotly visualizations
-- sample docs: `doc1.txt`, `doc2.txt`, `doc3.txt`
+- sample docs: `test_documents/`
 - `requirements.txt` — pinned Python dependencies
-- `tests/` — pytest unit tests used by the course
 
-## Quickstart (local)
+## Installation
 
-1. Create a virtual environment and activate it:
+Create and activate a virtual environment, install dependencies and download
+the required NLTK corpora:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-```
 
-2. Install dependencies:
-
-```bash
 pip install -r requirements.txt
+
+# Download NLTK resources used by the app
+python -m nltk.downloader stopwords wordnet omw-1.4
 ```
 
-3. Download required NLTK data (stopwords + wordnet):
+## Running the Application
 
-```bash
-python -m nltk.downloader stopwords wordnet
-```
-
-4. Run the Streamlit app:
+From the repository root run:
 
 ```bash
 streamlit run app.py
 ```
 
-The app UI lets you upload `.txt` documents, choose preprocessing options
-(lowercase, remove stopwords, lemmatize), compute TF-IDF and visualize
-document embeddings.
-
-## Tests
-
-Run the unit tests with:
-
-```bash
-pytest -q
-```
+Open the URL printed by Streamlit (usually `http://localhost:8501`). Use the
+UI to upload `.txt` files and select preprocessing options (lowercase,
+remove stopwords, lemmatize) before processing.
 
 ## Notes
 
-- This project intentionally avoids scikit-learn for the core TF-IDF and PCA
-  exercises; NumPy is used instead to keep implementations explicit.
-- If you plan to publish the repository, make sure your local `.venv` and any
-  large data files are excluded (see `.gitignore`).
-
-## Remote
-
-This repository can be pushed to `git@github.com:MuhammadMarmash/ml_project01.git`.
+- Use at least 5 documents for more meaningful visualizations.
+- The application assumes UTF-8 encoded text files.

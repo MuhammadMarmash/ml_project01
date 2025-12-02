@@ -1,2 +1,0 @@
-Natural language processing is a field of artificial intelligence.
-Natural language processing deals with text data.

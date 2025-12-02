@@ -30,7 +30,7 @@ import streamlit as st
 import numpy as np
 
 from tfidf import TFIDF
-from keywords_repr.keyword_vectors import build_filtered_matrix
+from keyword_vectors import build_filtered_matrix
 from dr import reduce_dimensions
 from plots import plot_2d, plot_3d
 
