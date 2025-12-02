@@ -3,8 +3,9 @@
 ## Team Members
 
 - Mohammad Marmash (ID: 326791068)
-- NMhammad Siag (ID: 213988819)
+- Mhammad Siag (ID: 213988819)
 - Abdullah Abulafi (ID: 213976194)
+- Mohammad Ibrahim (ID: 331978114)
 
 ## Project Overview
 
