@@ -1,21 +1,8 @@
-# dr_and_viz/dr.py
+# dr.py
 
-"""
-Owner: Abdallah
-
-Goal (MVP):
------------
-Convert high-dimensional document vectors (X_filtered) into 2D or 3D coordinates
-for visualization, using PCA or SVD based on numpy.linalg.svd.
-
-Important:
-----------
-- We do NOT use sklearn here (assignment restriction).
-- For both PCA and SVD modes, we first center the data.
-"""
-
-from typing import Literal
 import numpy as np
+from typing import Literal
+from sklearn.decomposition import PCA, TruncatedSVD
 
 
 def reduce_dimensions(
@@ -24,53 +11,55 @@ def reduce_dimensions(
     n_components: int = 2,
 ) -> np.ndarray:
     """
-    Reduce X to n_components dimensions.
+    Reduce high-dimensional document vectors to 2D/3D using sklearn.
 
-    Inputs:
+    Parameters
+    ----------
+    X : np.ndarray
+        Input matrix of shape (n_docs, n_features). Typically X_filtered (TF-IDF on top keywords).
+    method : {"PCA", "SVD"}
+        - "PCA": sklearn PCA (centers the data, true principal components).
+        - "SVD": sklearn TruncatedSVD (no centering, good for sparse / TF-IDF, LSA-style).
+    n_components : int
+        Target number of dimensions (2 or 3 for plotting).
+
+    Returns
     -------
-    X         : (n_docs, n_features) filtered document matrix
-    method    : "PCA" or "SVD"
-    n_components : 2 or 3
-
-    Steps (high level):
-    -------------------
-    1) Center X by subtracting the mean of each column.
-    2) Compute SVD: X_centered = U * S * V^T
-    3) For PCA:
-       - We can use U * S as our coordinates (projection on principal components).
-    4) For SVD mode:
-       - We can reuse the same coords, but we MUST be able to explain that it's
-         also a low-rank approximation.
-
-    Output:
-    -------
-    coords: (n_docs, n_components) array for plotting.
+    coords : np.ndarray
+        Array of shape (n_docs, n_components) with low-dimensional coordinates.
+        If the rank is smaller than n_components, remaining columns are zeros.
     """
-    # 1. Center the data (very important for PCA)
     if X.size == 0:
-        # Empty input: return zero coordinates
+        # No features -> return zeros with requested number of components
         return np.zeros((X.shape[0], n_components), dtype=float)
 
-    X_centered = X - X.mean(axis=0, keepdims=True)
+    n_docs, n_features = X.shape
 
-    # 2. Compute SVD
-    U, S, Vt = np.linalg.svd(X_centered, full_matrices=False)
+    # We cannot ask for more components than min(n_docs, n_features)
+    max_possible = min(n_docs, n_features)
+    if max_possible == 0:
+        return np.zeros((n_docs, n_components), dtype=float)
 
-    # 3. Take first n_components columns of U and scale by S
-    #    This gives us principal-component coordinates.
-    # If the SVD returns fewer components than requested (e.g. small rank),
-    # pad with zeros so the returned coords always have shape (n_docs, n_components).
-    n_available = min(U.shape[1], len(S))
+    k = min(n_components, max_possible)
 
-    coords = np.zeros((U.shape[0], n_components), dtype=float)
-    if n_available > 0:
-        take = min(n_components, n_available)
-        U_reduced = U[:, :take]
-        S_reduced = S[:take]
-        coords[:, :take] = U_reduced * S_reduced
+    if method == "PCA":
+        # sklearn PCA does centering internally
+        pca = PCA(n_components=k)
+        coords_k = pca.fit_transform(X)  # shape (n_docs, k)
 
-    # For this assignment, PCA vs SVD mainly affects how you EXPLAIN it.
-    # The math here is the same; you can mention that PCA is basically
-    # "SVD on the centered data" and we keep the top components.
+    elif method == "SVD":
+        # TruncatedSVD does NOT center; this is typical for TF-IDF / LSA
+        # random_state just for reproducibility
+        svd = TruncatedSVD(n_components=k, random_state=42)
+        coords_k = svd.fit_transform(X)  # shape (n_docs, k)
 
+    else:
+        raise ValueError(f"Unknown reduction method: {method}")
+
+    # If k < n_components (rank-deficient case), pad with zeros
+    if k == n_components:
+        return coords_k.astype(float)
+
+    coords = np.zeros((n_docs, n_components), dtype=float)
+    coords[:, :k] = coords_k
     return coords

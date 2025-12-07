@@ -1,15 +1,3 @@
-"""
-TF-IDF engine (single-file implementation expected by the app)
-
-This module provides the `TFIDF` class implementing Version 2.0 requirements:
-- preprocessing options in `__init__`
-- preprocessing happens inside `fit()` and `transform()`
-- `fit()`, `transform()`, `fit_transform()`
-- `get_feature_names()`, `save_to_file()`, `load_from_file()`
-
-The implementation mirrors the working version previously in `core_tfidf/tfidf_engine.py`.
-"""
-
 from typing import List, Dict, Optional
 import re
 import pickle
@@ -20,9 +8,6 @@ from nltk.stem import WordNetLemmatizer
 
 
 class TFIDF:
-    """
-    Simple TF-IDF implementation with configurable preprocessing.
-    """
 
     def __init__(
         self,
@@ -92,9 +77,6 @@ class TFIDF:
         n_docs = len(documents)
         n_vocab = len(self.vocabulary_)
 
-        # If vocabulary is empty (e.g. all documents had no valid tokens
-        # after preprocessing), return an empty feature matrix rather than
-        # raising. This allows pipelines to continue and handle empty rows.
         if n_vocab == 0:
             return np.zeros((n_docs, 0), dtype=np.float64)
 
