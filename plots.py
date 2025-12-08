@@ -1,7 +1,6 @@
 from typing import List, Optional
 import numpy as np
-import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
 
 def plot_2d(
@@ -12,49 +11,52 @@ def plot_2d(
     if coords.shape[1] < 2:
         coords = np.column_stack([coords, np.zeros(coords.shape[0])])
 
-    df = pd.DataFrame(
-        {
-            "x": coords[:, 0],
-            "y": coords[:, 1],
-            "filename": filenames,
-            "selected": [i == selected_idx for i in range(len(filenames))],
-        }
+    coords = np.asarray(coords)
+    n_docs = len(filenames)
+
+    fig = go.Figure()
+
+    all_indices = np.arange(n_docs)
+
+    if selected_idx is not None and 0 <= selected_idx < n_docs:
+        unselected_indices = all_indices[all_indices != selected_idx]
+    else:
+        unselected_indices = all_indices
+        selected_idx = None
+
+    if len(unselected_indices) > 0:
+        fig.add_trace(
+            go.Scatter(
+                x=coords[unselected_indices, 0],
+                y=coords[unselected_indices, 1],
+                mode="markers",
+                marker=dict(color="blue", size=8),
+                text=[filenames[i] for i in unselected_indices],
+                hovertemplate="%{text}<extra></extra>",
+                name="Documents",
+            )
+        )
+
+    if selected_idx is not None:
+        fig.add_trace(
+            go.Scatter(
+                x=[coords[selected_idx, 0]],
+                y=[coords[selected_idx, 1]],
+                mode="markers",
+                marker=dict(color="red", size=12, symbol="diamond"),
+                text=[filenames[selected_idx]],
+                hovertemplate="%{text}<extra></extra>",
+                name="Selected Document",
+            )
+        )
+
+    fig.update_layout(
+        title="2D Document Visualization",
+        xaxis_title="Component 1",
+        yaxis_title="Component 2",
+        legend_title="Documents",
     )
 
-    df_non = df[~df["selected"]]
-    df_sel = df[df["selected"]]
-
-    if not df_non.empty:
-        fig = px.scatter(
-            df_non,
-            x="x",
-            y="y",
-            hover_name="filename",
-            labels={"x": "Component 1", "y": "Component 2"},
-        )
-    else:
-        fig = px.scatter(
-            df_sel,
-            x="x",
-            y="y",
-            hover_name="filename",
-            labels={"x": "Component 1", "y": "Component 2"},
-        )
-        fig.update_traces(marker=dict(size=14, symbol="star"))
-        fig.update_layout(xaxis=dict(scaleanchor="y", scaleratio=1), yaxis=dict(scaleanchor="x", scaleratio=1))
-        return fig
-
-    if not df_sel.empty:
-        fig_sel = px.scatter(
-            df_sel,
-            x="x",
-            y="y",
-            hover_name="filename",
-        )
-        fig_sel.update_traces(marker=dict(size=14, symbol="star"))
-        fig.add_traces(fig_sel.data)
-
-    fig.update_layout(xaxis=dict(scaleanchor="y", scaleratio=1), yaxis=dict(scaleanchor="x", scaleratio=1))
     return fig
 
 
@@ -66,59 +68,55 @@ def plot_3d(
     while coords.shape[1] < 3:
         coords = np.column_stack([coords, np.zeros(coords.shape[0])])
 
-    df = pd.DataFrame(
-        {
-            "x": coords[:, 0],
-            "y": coords[:, 1],
-            "z": coords[:, 2],
-            "filename": filenames,
-            "selected": [i == selected_idx for i in range(len(filenames))],
-        }
+    coords = np.asarray(coords)
+    n_docs = len(filenames)
+
+    fig = go.Figure()
+
+    all_indices = np.arange(n_docs)
+
+    if selected_idx is not None and 0 <= selected_idx < n_docs:
+        unselected_indices = all_indices[all_indices != selected_idx]
+    else:
+        unselected_indices = all_indices
+        selected_idx = None
+
+    if len(unselected_indices) > 0:
+        fig.add_trace(
+            go.Scatter3d(
+                x=coords[unselected_indices, 0],
+                y=coords[unselected_indices, 1],
+                z=coords[unselected_indices, 2],
+                mode="markers",
+                marker=dict(color="blue", size=6),
+                text=[filenames[i] for i in unselected_indices],
+                hovertemplate="%{text}<extra></extra>",
+                name="Documents",
+            )
+        )
+
+    if selected_idx is not None:
+        fig.add_trace(
+            go.Scatter3d(
+                x=[coords[selected_idx, 0]],
+                y=[coords[selected_idx, 1]],
+                z=[coords[selected_idx, 2]],
+                mode="markers",
+                marker=dict(color="red", size=10, symbol="diamond"),
+                text=[filenames[selected_idx]],
+                hovertemplate="%{text}<extra></extra>",
+                name="Selected Document",
+            )
+        )
+
+    fig.update_layout(
+        title="3D Document Visualization",
+        scene=dict(
+            xaxis_title="Component 1",
+            yaxis_title="Component 2",
+            zaxis_title="Component 3",
+        ),
+        legend_title="Documents",
     )
 
-    df_non = df[~df["selected"]]
-    df_sel = df[df["selected"]]
-
-    if not df_non.empty:
-        fig = px.scatter_3d(
-            df_non,
-            x="x",
-            y="y",
-            z="z",
-            hover_name="filename",
-            labels={
-                "x": "Component 1",
-                "y": "Component 2",
-                "z": "Component 3",
-            },
-        )
-    else:
-        fig = px.scatter_3d(
-            df_sel,
-            x="x",
-            y="y",
-            z="z",
-            hover_name="filename",
-            labels={
-                "x": "Component 1",
-                "y": "Component 2",
-                "z": "Component 3",
-            },
-        )
-        fig.update_traces(marker=dict(size=10, symbol="diamond"))
-        fig.update_layout(scene=dict(aspectmode="cube"))
-        return fig
-
-    if not df_sel.empty:
-        fig_sel = px.scatter_3d(
-            df_sel,
-            x="x",
-            y="y",
-            z="z",
-            hover_name="filename",
-        )
-        fig_sel.update_traces(marker=dict(size=10, symbol="diamond"))
-        fig.add_traces(fig_sel.data)
-
-    fig.update_layout(scene=dict(aspectmode="cube"))
     return fig

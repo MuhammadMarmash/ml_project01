@@ -81,19 +81,10 @@ def main():
             X_full, feature_names, top_n
         )
 
-        non_empty_indices = []
-        for i in range(X_filtered.shape[0]):
-            if not np.allclose(X_filtered[i, :], 0.0):
-                non_empty_indices.append(i)
-
-        X_filtered = X_filtered[non_empty_indices, :]
-        filenames_filtered = [filenames[i] for i in non_empty_indices]
-        doc_top_keywords_filtered = [doc_top_keywords[i] for i in non_empty_indices]
-
         st.session_state["X_filtered"] = X_filtered
         st.session_state["keywords_sorted"] = keywords_sorted
-        st.session_state["doc_top_keywords"] = doc_top_keywords_filtered
-        st.session_state["filenames"] = filenames_filtered
+        st.session_state["doc_top_keywords"] = doc_top_keywords
+        st.session_state["filenames"] = filenames
 
         st.success("Documents processed successfully. Scroll down for visualization.")
 

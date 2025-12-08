@@ -12,39 +12,36 @@ def build_filtered_matrix(
     doc_top_keywords: List[List[Tuple[str, float]]] = []
     union_keywords = set()
 
-    for i in range(n_docs):
-        row = X_full[i, :]
+    # 1) Same as your friend's: compute top_n keywords per doc
+    for doc_idx in range(n_docs):
+        row = X_full[doc_idx, :]
 
-        if np.allclose(row, 0.0):
-            doc_top_keywords.append([])
-            continue
-
-        sorted_indices = np.argsort(row)[::-1]
-
-        top_indices = [idx for idx in sorted_indices if row[idx] > 0][:top_n]
+        index_scores = list(enumerate(row))
+        sorted_scores = sorted(index_scores, key=lambda t: t[1], reverse=True)
+        top_pairs = sorted_scores[:top_n]
 
         keywords_scores: List[Tuple[str, float]] = []
-        for idx in top_indices:
+        for idx, score in top_pairs:
             word = feature_names[idx]
-            score = float(row[idx])
+            score = float(score)
             keywords_scores.append((word, score))
             union_keywords.add(word)
 
         doc_top_keywords.append(keywords_scores)
 
+    # 2) Same union + sorted list as friend
     keywords_sorted = sorted(union_keywords)
 
-    kw_to_col = {w: j for j, w in enumerate(keywords_sorted)}
+    # 3) Map word -> original vocab index
+    word_to_vocab_idx = {w: i for i, w in enumerate(feature_names)}
 
+    # 4) Build filtered matrix EXACTLY like his code
     n_keywords = len(keywords_sorted)
     X_filtered = np.zeros((n_docs, n_keywords), dtype=np.float64)
 
-    word_to_vocab_idx = {w: i for i, w in enumerate(feature_names)}
-
-    for doc_idx in range(n_docs):
-        for (word, score) in doc_top_keywords[doc_idx]:
-            j_filtered = kw_to_col[word]
-            i_vocab = word_to_vocab_idx[word]
-            X_filtered[doc_idx, j_filtered] = X_full[doc_idx, i_vocab]
+    for i in range(n_docs):
+        for j, word in enumerate(keywords_sorted):
+            vocab_idx = word_to_vocab_idx[word]
+            X_filtered[i, j] = X_full[i, vocab_idx]
 
     return X_filtered, keywords_sorted, doc_top_keywords
